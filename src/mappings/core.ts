@@ -35,7 +35,8 @@ export function handleInitialize(event: Initialize): void {
   bundle.ethPriceUSD = getEthPriceInUSD()
   bundle.save()
 
-  updatePoolDayData(event)
+  let poolDayData = new PoolDayData(pool)
+  poolDayData.save()
   updatePoolHourData(event)
 
   // update token prices
@@ -404,7 +405,7 @@ export function handleSwap(event: SwapEvent): void {
 
   // interval data
   let uniswapDayData = updateUniswapDayData(event)
-  let poolDayData = updatePoolDayData(event)
+  let poolDayData = new PoolDayData(pool)  // used updatePoolDayData
   let poolHourData = updatePoolHourData(event)
   let token0DayData = updateTokenDayData(token0 as Token, event)
   let token1DayData = updateTokenDayData(token1 as Token, event)
@@ -416,10 +417,10 @@ export function handleSwap(event: SwapEvent): void {
   uniswapDayData.volumeUSD = uniswapDayData.volumeUSD.plus(amountTotalUSDTracked)
   uniswapDayData.feesUSD = uniswapDayData.feesUSD.plus(feesUSD)
 
-  poolDayData.volumeUSD = poolDayData.volumeUSD.plus(amountTotalUSDTracked)
-  poolDayData.volumeToken0 = poolDayData.volumeToken0.plus(amount0Abs)
-  poolDayData.volumeToken1 = poolDayData.volumeToken1.plus(amount1Abs)
-  poolDayData.feesUSD = poolDayData.feesUSD.plus(feesUSD)
+  poolDayData.volumeUSD = amountTotalUSDTracked
+  poolDayData.volumeToken0 = amount0Abs
+  poolDayData.volumeToken1 = amount1Abs
+  poolDayData.feesUSD = feesUSD
 
   poolHourData.volumeUSD = poolHourData.volumeUSD.plus(amountTotalUSDTracked)
   poolHourData.volumeToken0 = poolHourData.volumeToken0.plus(amount0Abs)

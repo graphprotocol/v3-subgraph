@@ -452,47 +452,48 @@ type UniswapDayData @entity {
 }
 
 # Data accumulated and condensed into day stats for each pool
-type PoolDayData @entity {
+type PoolDayData @timeseries(interval: "1d", entity: "Pool") {
   # timestamp rounded to current day by dividing by 86400
   id: ID!
-  # timestamp rounded to current day by dividing by 86400
-  date: Int!
+  # timestamp in seconds rounded to current day by rounding to closest
+  # multiple of 86400
+  date: Int! @timestamp
   # pointer to pool
   pool: Pool!
   # in range liquidity at end of period
-  liquidity: BigInt!
+  liquidity: BigInt! @aggregate(fn: "last")
   # current price tracker at end of period
-  sqrtPrice: BigInt!
+  sqrtPrice: BigInt! @aggregate(fn: "last")
   # price of token0 - derived from sqrtPrice
-  token0Price: BigDecimal!
+  token0Price: BigDecimal! @aggregate(fn: "last")
   # price of token1 - derived from sqrtPrice
-  token1Price: BigDecimal!
+  token1Price: BigDecimal!  @aggregate(fn: "last")
   # current tick at end of period
-  tick: BigInt
+  tick: BigInt @aggregate(fn: "last")
   # tracker for global fee growth
-  feeGrowthGlobal0X128: BigInt!
+  feeGrowthGlobal0X128: BigInt!  @aggregate(fn: "last")
   # tracker for global fee growth
-  feeGrowthGlobal1X128: BigInt!
+  feeGrowthGlobal1X128: BigInt!  @aggregate(fn: "last")
   # tvl derived in USD at end of period
-  tvlUSD: BigDecimal!
+  tvlUSD: BigDecimal!  @aggregate(fn: "last", from:"totalValueLockedUSD")
   # volume in token0
-  volumeToken0: BigDecimal!
+  volumeToken0: BigDecimal!  @aggregate(fn: "sum", from: "=")
   # volume in token1
-  volumeToken1: BigDecimal!
+  volumeToken1: BigDecimal! @aggregate(fn: "sum", from: "=")
   # volume in USD
-  volumeUSD: BigDecimal!
+  volumeUSD: BigDecimal!  @aggregate(fn: "sum", from: "=")
   # fees in USD
-  feesUSD: BigDecimal!
+  feesUSD: BigDecimal!  @aggregate(fn: "sum", from: "=")
   # numebr of transactions during period
-  txCount: BigInt!
+  txCount: BigInt!  @aggregate(fn: "count")
   # opening price of token0
-  open: BigDecimal!
+  open: BigDecimal!  @aggregate(fn: "first", from: "token0Price")
   # high price of token0
-  high: BigDecimal!
+  high: BigDecimal!  @aggregate(fn: "max", from: "token0Price")
   # low price of token0
-  low: BigDecimal!
+  low: BigDecimal!  @aggregate(fn: "min", from: "token0Price")
   # close price of token0
-  close: BigDecimal!
+  close: BigDecimal!  @aggregate(fn: "last", from: "token0Price")
 }
 
 # hourly stats tracker for pool

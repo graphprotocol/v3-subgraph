@@ -40,6 +40,7 @@ export function updateUniswapDayData(event: ethereum.Event): UniswapDayData {
   return uniswapDayData as UniswapDayData
 }
 
+// UNUSED
 export function updatePoolDayData(event: ethereum.Event): PoolDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
