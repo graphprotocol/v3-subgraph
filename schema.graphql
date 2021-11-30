@@ -452,12 +452,11 @@ type UniswapDayData @entity {
 }
 
 # Data accumulated and condensed into day stats for each pool
-type PoolDayData @timeseries(interval: "1d", entity: "Pool") {
-  # timestamp rounded to current day by dividing by 86400
-  id: ID!
-  # timestamp in seconds rounded to current day by rounding to closest
-  # multiple of 86400
-  date: Int! @timestamp
+type PoolData @timeseries(interval: ["1h", "1d"], entity: "Pool") {
+  # timestamp in seconds rounded to beginning of aggregation period, i.e.,
+  # multiple of 86400 for daily aggregations, multiple of 3600 for hourly
+  # timestamp is based on `event.block.timestamp.toI32()`
+  timestamp: Int! @timestamp
   # pointer to pool
   pool: Pool!
   # in range liquidity at end of period
@@ -494,50 +493,6 @@ type PoolDayData @timeseries(interval: "1d", entity: "Pool") {
   low: BigDecimal!  @aggregate(fn: "min", from: "token0Price")
   # close price of token0
   close: BigDecimal!  @aggregate(fn: "last", from: "token0Price")
-}
-
-# hourly stats tracker for pool
-type PoolHourData @entity {
-  # format: <pool address>-<timestamp>
-  id: ID!
-  # unix timestamp for start of hour
-  periodStartUnix: Int!
-  # pointer to pool
-  pool: Pool!
-  # in range liquidity at end of period
-  liquidity: BigInt!
-  # current price tracker at end of period
-  sqrtPrice: BigInt!
-  # price of token0 - derived from sqrtPrice
-  token0Price: BigDecimal!
-  # price of token1 - derived from sqrtPrice
-  token1Price: BigDecimal!
-  # current tick at end of period
-  tick: BigInt
-  # tracker for global fee growth
-  feeGrowthGlobal0X128: BigInt!
-  # tracker for global fee growth
-  feeGrowthGlobal1X128: BigInt!
-  # tvl derived in USD at end of period
-  tvlUSD: BigDecimal!
-  # volume in token0
-  volumeToken0: BigDecimal!
-  # volume in token1
-  volumeToken1: BigDecimal!
-  # volume in USD
-  volumeUSD: BigDecimal!
-  # fees in USD
-  feesUSD: BigDecimal!
-  # numebr of transactions during period
-  txCount: BigInt!
-  # opening price of token0
-  open: BigDecimal!
-  # high price of token0
-  high: BigDecimal!
-  # low price of token0
-  low: BigDecimal!
-  # close price of token0
-  close: BigDecimal!
 }
 
 type TickHourData @entity {
