@@ -495,55 +495,31 @@ type PoolData @timeseries(interval: ["1h", "1d"], entity: "Pool", args: ["volume
   close: BigDecimal!  @aggregate(fn: "last", from: "token0Price")
 }
 
-type TickHourData @entity {
-  # format: <pool address>-<tick index>-<timestamp>
-  id: ID!
-  # unix timestamp for start of hour
-  periodStartUnix: Int!
-  # pointer to pool
-  pool: Pool!
-  # pointer to tick
-  tick: Tick!
-  # total liquidity pool has as tick lower or upper at end of period
-  liquidityGross: BigInt!
-  # how much liquidity changes when tick crossed at end of period
-  liquidityNet: BigInt!
-  # hourly volume of token0 with this tick in range
-  volumeToken0: BigDecimal!
-  # hourly volume of token1 with this tick in range
-  volumeToken1: BigDecimal!
-  # hourly volume in derived USD with this tick in range
-  volumeUSD: BigDecimal!
-  # fees in USD
-  feesUSD: BigDecimal!
-}
-
 # Data accumulated and condensed into day stats for each exchange
 # Note: this entity gets saved only if there is a change during the day
-type TickDayData @entity {
-  # format: <pool address>-<tick index>-<timestamp>
-  id: ID!
+# The original subgraph also had TickHourData but that was not used anywhere
+type TickDayData @timeseries(interval: ["1d"], entity: ["Pool", "Tick"], args: ["volumeToken0", "volumeToken1", "volumeUSD", "feesUSD"]) {
   # timestamp rounded to current day by dividing by 86400
-  date: Int!
+  date: Int! @timestamp
   # pointer to pool
   pool: Pool!
   # pointer to tick
   tick: Tick!
   # total liquidity pool has as tick lower or upper at end of period
-  liquidityGross: BigInt!
+  liquidityGross: BigInt! @aggregate(fn: "last")
   # how much liquidity changes when tick crossed at end of period
-  liquidityNet: BigInt!
+  liquidityNet: BigInt! @aggregate(fn: "last")
   # hourly volume of token0 with this tick in range
-  volumeToken0: BigDecimal!
+  volumeToken0: BigDecimal! @aggregate(fn: "last")
   # hourly volume of token1 with this tick in range
-  volumeToken1: BigDecimal!
+  volumeToken1: BigDecimal! @aggregate(fn: "last")
   # hourly volume in derived USD with this tick in range
-  volumeUSD: BigDecimal!
+  volumeUSD: BigDecimal! @aggregate(fn: "last")
   # fees in USD
-  feesUSD: BigDecimal!
+  feesUSD: BigDecimal! @aggregate(fn: "last")
   # vars needed for fee computation
-  feeGrowthOutside0X128: BigInt!
-  feeGrowthOutside1X128: BigInt!
+  feeGrowthOutside0X128: BigInt! @aggregate(fn: "last")
+  feeGrowthOutside1X128: BigInt! @aggregate(fn: "last")
 }
 
 type TokenData @timeseries(interval: ["1h", "1d"], entity: "Token", args: [ "tokenPrice", "volume", "volumeUSD", "feesUSD" ] }) {

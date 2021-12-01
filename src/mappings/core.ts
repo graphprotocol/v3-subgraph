@@ -13,7 +13,7 @@ import { convertTokenToDecimal, loadTransaction, safeDiv } from '../utils'
 import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from '../utils/constants'
 import { findEthPerToken, getEthPriceInUSD, getTrackedAmountUSD, sqrtPriceX96ToTokenPrices } from '../utils/pricing'
 import {
-  updateTickDayData,
+  updateTickData,
   updateTokenData,
   updateUniswapDayData
 } from '../utils/intervalUpdates'
@@ -486,7 +486,7 @@ function updateTickFeeVarsAndSave(tick: Tick, event: ethereum.Event): void {
   tick.feeGrowthOutside1X128 = tickResult.value3
   tick.save()
 
-  updateTickDayData(tick!, event)
+  updateTickData(tick!, event)
 }
 
 function loadTickUpdateFeeVarsAndSave(tickId: i32, event: ethereum.Event): void {
