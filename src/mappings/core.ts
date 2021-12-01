@@ -13,11 +13,8 @@ import { convertTokenToDecimal, loadTransaction, safeDiv } from '../utils'
 import { FACTORY_ADDRESS, ONE_BI, ZERO_BD, ZERO_BI } from '../utils/constants'
 import { findEthPerToken, getEthPriceInUSD, getTrackedAmountUSD, sqrtPriceX96ToTokenPrices } from '../utils/pricing'
 import {
-  updatePoolDayData,
-  updatePoolHourData,
   updateTickDayData,
-  updateTokenDayData,
-  updateTokenHourData,
+  updateTokenData,
   updateUniswapDayData
 } from '../utils/intervalUpdates'
 import { createTick, feeTierToTickSpacing } from '../utils/tick'
@@ -179,10 +176,8 @@ export function handleMint(event: MintEvent): void {
   updateUniswapDayData(event)
   let poolData = new PoolData(timestamp, pool)
   poolData.save()
-  updateTokenDayData(token0 as Token, event)
-  updateTokenDayData(token1 as Token, event)
-  updateTokenHourData(token0 as Token, event)
-  updateTokenHourData(token1 as Token, event)
+  updateTokenData(token0 as Token, event, ZERO_BD, ZERO_BD, ZERO_BD)
+  updateTokenData(token1 as Token, event, ZERO_BD, ZERO_BD, ZERO_BD)
 
   token0.save()
   token1.save()
@@ -283,10 +278,8 @@ export function handleBurn(event: BurnEvent): void {
   updateUniswapDayData(event)
   let poolData = new PoolData(timestamp, pool)
   poolData.save()
-  updateTokenDayData(token0 as Token, event)
-  updateTokenDayData(token1 as Token, event)
-  updateTokenHourData(token0 as Token, event)
-  updateTokenHourData(token1 as Token, event)
+  updateTokenData(token0 as Token, event, ZERO_BD, ZERO_BD, ZERO_BD)
+  updateTokenData(token1 as Token, event, ZERO_BD, ZERO_BD, ZERO_BD)
   updateTickFeeVarsAndSave(lowerTick!, event)
   updateTickFeeVarsAndSave(upperTick!, event)
 
@@ -439,10 +432,9 @@ export function handleSwap(event: SwapEvent): void {
   let timestamp = event.block.timestamp.toI32();
   let uniswapDayData = updateUniswapDayData(event)
   let poolData = new PoolData(timestamp, pool)  // used updatePoolDayData
-  let token0DayData = updateTokenDayData(token0 as Token, event)
-  let token1DayData = updateTokenDayData(token1 as Token, event)
-  let token0HourData = updateTokenHourData(token0 as Token, event)
-  let token1HourData = updateTokenHourData(token1 as Token, event)
+
+  updateTokenData(token0 as Token, event, amount0Abs, amountTotalUSDTracked, feesUSD)
+  updateTokenData(token1 as Token, event, amount1Abs, amountTotalUSDTracked, feesUSD)
 
   // update volume metrics
   uniswapDayData.volumeETH = uniswapDayData.volumeETH.plus(amountTotalETHTracked)
@@ -454,29 +446,7 @@ export function handleSwap(event: SwapEvent): void {
   poolData.volumeToken1 = amount1Abs
   poolData.feesUSD = feesUSD
 
-  token0DayData.volume = token0DayData.volume.plus(amount0Abs)
-  token0DayData.volumeUSD = token0DayData.volumeUSD.plus(amountTotalUSDTracked)
-  token0DayData.untrackedVolumeUSD = token0DayData.untrackedVolumeUSD.plus(amountTotalUSDTracked)
-  token0DayData.feesUSD = token0DayData.feesUSD.plus(feesUSD)
-
-  token0HourData.volume = token0HourData.volume.plus(amount0Abs)
-  token0HourData.volumeUSD = token0HourData.volumeUSD.plus(amountTotalUSDTracked)
-  token0HourData.untrackedVolumeUSD = token0HourData.untrackedVolumeUSD.plus(amountTotalUSDTracked)
-  token0HourData.feesUSD = token0HourData.feesUSD.plus(feesUSD)
-
-  token1DayData.volume = token1DayData.volume.plus(amount1Abs)
-  token1DayData.volumeUSD = token1DayData.volumeUSD.plus(amountTotalUSDTracked)
-  token1DayData.untrackedVolumeUSD = token1DayData.untrackedVolumeUSD.plus(amountTotalUSDTracked)
-  token1DayData.feesUSD = token1DayData.feesUSD.plus(feesUSD)
-
-  token1HourData.volume = token1HourData.volume.plus(amount1Abs)
-  token1HourData.volumeUSD = token1HourData.volumeUSD.plus(amountTotalUSDTracked)
-  token1HourData.untrackedVolumeUSD = token1HourData.untrackedVolumeUSD.plus(amountTotalUSDTracked)
-  token1HourData.feesUSD = token1HourData.feesUSD.plus(feesUSD)
-
   swap.save()
-  token0DayData.save()
-  token1DayData.save()
   uniswapDayData.save()
   poolData.save()
   factory.save()

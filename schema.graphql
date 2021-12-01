@@ -546,35 +546,32 @@ type TickDayData @entity {
   feeGrowthOutside1X128: BigInt!
 }
 
-type TokenDayData @entity {
-  # token address concatendated with date
-  id: ID!
-  # timestamp rounded to current day by dividing by 86400
-  date: Int!
+type TokenData @timeseries(interval: ["1h", "1d"], entity: "Token", args: [ "tokenPrice", "volume", "volumeUSD", "feesUSD" ] }) {
+  timestamp: Int! @timestamp
   # pointer to token
   token: Token!
   # volume in token units
-  volume: BigDecimal!
+  volume: BigDecimal! @aggregate(fn: "sum")
   # volume in derived USD
-  volumeUSD: BigDecimal!
+  volumeUSD: BigDecimal! @aggregate(fn: "sum")
   # volume in USD even on pools with less reliable USD values
-  untrackedVolumeUSD: BigDecimal!
+  untrackedVolumeUSD: BigDecimal! @aggregate(fn: "sum", from: "volumeUSD")
   # liquidity across all pools in token units
-  totalValueLocked: BigDecimal!
+  totalValueLocked: BigDecimal! @aggregate(fn: "last")
   # liquidity across all pools in derived USD
-  totalValueLockedUSD: BigDecimal!
+  totalValueLockedUSD: BigDecimal! @aggregate(fn: "last")
   # price at end of period in USD
-  priceUSD: BigDecimal!
+  priceUSD: BigDecimal! @aggregate(fn: "last", from: "tokenPrice")
   # fees in USD
-  feesUSD: BigDecimal!
+  feesUSD: BigDecimal! @aggregate(fn: "sum")
   # opening price USD
-  open: BigDecimal!
+  open: BigDecimal! @aggregate(fn: "first", from: "tokenPrice")
   # high price USD
-  high: BigDecimal!
+  high: BigDecimal! @aggregate(fn: "max", from: "tokenPrice")
   # low price USD
-  low: BigDecimal!
+  low: BigDecimal! @aggregate(fn: "min", from: "tokenPrice")
   # close price USD
-  close: BigDecimal!
+  close: BigDecimal! @aggregate(fn: "last", from: "tokenPrice")
 }
 
 type TokenHourData @entity {
