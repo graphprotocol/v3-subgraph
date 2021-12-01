@@ -432,7 +432,7 @@ type Flash @entity {
 }
 
 # Data accumulated and condensed into day stats for all of Uniswap
-type UniswapDayData @timeseries(interval: ["1d"], args: ["volumeETH", "volumeUSD", "volumeUSDUntracked", "feesUSD", "tvlUSD"]) {
+type UniswapData @timeseries(interval: ["1d"], args: ["volumeETH", "volumeUSD", "volumeUSDUntracked", "feesUSD", "tvlUSD"]) {
   # timestamp rounded to current day by dividing by 86400
   date: Int! @timestamp
   # total daily volume in Uniswap derived in terms of ETH
