@@ -452,7 +452,7 @@ type UniswapDayData @entity {
 }
 
 # Data accumulated and condensed into day stats for each pool
-type PoolData @timeseries(interval: ["1h", "1d"], entity: "Pool") {
+type PoolData @timeseries(interval: ["1h", "1d"], entity: "Pool", args: ["volumeToken0", "volumeToken1", "volumeUSD", "feesUSD"]) {
   # timestamp in seconds rounded to beginning of aggregation period, i.e.,
   # multiple of 86400 for daily aggregations, multiple of 3600 for hourly
   # timestamp is based on `event.block.timestamp.toI32()`
@@ -476,13 +476,13 @@ type PoolData @timeseries(interval: ["1h", "1d"], entity: "Pool") {
   # tvl derived in USD at end of period
   tvlUSD: BigDecimal!  @aggregate(fn: "last", from:"totalValueLockedUSD")
   # volume in token0
-  volumeToken0: BigDecimal!  @aggregate(fn: "sum", from: "=")
+  volumeToken0: BigDecimal!  @aggregate(fn: "sum")
   # volume in token1
-  volumeToken1: BigDecimal! @aggregate(fn: "sum", from: "=")
+  volumeToken1: BigDecimal! @aggregate(fn: "sum")
   # volume in USD
-  volumeUSD: BigDecimal!  @aggregate(fn: "sum", from: "=")
+  volumeUSD: BigDecimal!  @aggregate(fn: "sum")
   # fees in USD
-  feesUSD: BigDecimal!  @aggregate(fn: "sum", from: "=")
+  feesUSD: BigDecimal!  @aggregate(fn: "sum")
   # numebr of transactions during period
   txCount: BigInt!  @aggregate(fn: "count")
   # opening price of token0
