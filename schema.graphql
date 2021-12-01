@@ -432,23 +432,22 @@ type Flash @entity {
 }
 
 # Data accumulated and condensed into day stats for all of Uniswap
-type UniswapDayData @entity {
+type UniswapDayData @timeseries(interval: ["1d"], args: ["volumeETH", "volumeUSD", "volumeUSDUntracked", "feesUSD", "tvlUSD"]) {
   # timestamp rounded to current day by dividing by 86400
-  id: ID!
-  # timestamp rounded to current day by dividing by 86400
-  date: Int!
+  date: Int! @timestamp
   # total daily volume in Uniswap derived in terms of ETH
-  volumeETH: BigDecimal!
+  volumeETH: BigDecimal! @aggregate(fn: "sum")
   # total daily volume in Uniswap derived in terms of USD
-  volumeUSD: BigDecimal!
+  volumeUSD: BigDecimal! @aggregate(fn: "sum")
   # total daily volume in Uniswap derived in terms of USD untracked
-  volumeUSDUntracked: BigDecimal!
+  # this field is present in the original, but always 0
+  # volumeUSDUntracked: BigDecimal! @aggregate(fn: "sum")
   # fees in USD
-  feesUSD: BigDecimal!
+  feesUSD: BigDecimal! @aggregate(fn: "sum")
   # number of daily transactions
-  txCount: BigInt!
+  txCount: BigInt! @aggregate(fn: "count")
   # tvl in terms of USD
-  tvlUSD: BigDecimal!
+  tvlUSD: BigDecimal! @aggregate(fn: "sum")
 }
 
 # Data accumulated and condensed into day stats for each pool

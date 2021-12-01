@@ -45,7 +45,7 @@ export function handleInitialize(event: Initialize): void {
   bundle.save()
 
   let timestamp = event.block.timestamp.toI32();
-  let poolData = new PoolData(timestamp, pool)
+  let poolData = new PoolData(timestamp, pool, ZERO_BD, ZERO_BD, ZERO_BD, ZERO_BD)
   poolData.save()
 
   // update token prices
@@ -157,7 +157,7 @@ export function handleMint(event: MintEvent): void {
 
   let timestamp = event.block.timestamp.toI32();
 
-  updateUniswapDayData(event)
+  updateUniswapDayData(event, ZERO_BD, ZERO_BD, ZERO_BD)
   let poolData = new PoolData(timestamp, pool, ZERO_BD, ZERO_BD, ZERO_BD, ZERO_BD)
   poolData.save()
   updateTokenData(token0 as Token, event, ZERO_BD, ZERO_BD, ZERO_BD)
@@ -259,7 +259,7 @@ export function handleBurn(event: BurnEvent): void {
 
   let timestamp = event.block.timestamp.toI32();
 
-  updateUniswapDayData(event)
+  updateUniswapDayData(event, ZERO_BD, ZERO_BD, ZERO_BD)
   let poolData = new PoolData(timestamp, pool, ZERO_BD, ZERO_BD, ZERO_BD, ZERO_BD)
   poolData.save()
   updateTokenData(token0 as Token, event, ZERO_BD, ZERO_BD, ZERO_BD)
@@ -414,19 +414,13 @@ export function handleSwap(event: SwapEvent): void {
 
   // interval data
   let timestamp = event.block.timestamp.toI32();
-  let uniswapDayData = updateUniswapDayData(event)
+  updateUniswapDayData(event, amountTotalETHTracked, amountTotalUSDTracked, feesUSD)
   let poolData = new PoolData(timestamp, pool, amount0Abs, amount1Abs, amountTotalUSDTracked, feesUSD)
 
   updateTokenData(token0 as Token, event, amount0Abs, amountTotalUSDTracked, feesUSD)
   updateTokenData(token1 as Token, event, amount1Abs, amountTotalUSDTracked, feesUSD)
 
-  // update volume metrics
-  uniswapDayData.volumeETH = uniswapDayData.volumeETH.plus(amountTotalETHTracked)
-  uniswapDayData.volumeUSD = uniswapDayData.volumeUSD.plus(amountTotalUSDTracked)
-  uniswapDayData.feesUSD = uniswapDayData.feesUSD.plus(feesUSD)
-
   swap.save()
-  uniswapDayData.save()
   poolData.save()
   factory.save()
   pool.save()
